@@ -1,71 +1,107 @@
-import tkinter as tk
-from tkinter import PhotoImage, filedialog
-from tkinter import ttk
-import sv_ttk
+import sys
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import (
+    QApplication,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QGroupBox,
+    QComboBox,
+    QPushButton,
+    QTextEdit,
+    QLabel,
+    QFormLayout,
+    QFileDialog
+)
 
-class Application(tk.Tk):
+class App(QWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("Title ?")
+        self.setGeometry(0, 0, 800, 600)
 
-        icon = PhotoImage(file="assets/dit_500.png")
-        self.iconphoto(False, icon)
+        app_icon = QIcon("assets/logo_flat_h50.png") # not working?
+        self.setWindowIcon(app_icon)
 
-        self.title("Title?")
-        self.geometry("700x400")
+        self.initUI()
 
-        self.tab_bar()
-        self.top_bar()
+    def initUI(self):
+        main_lyt = QVBoxLayout()
+        classifier_group = QGroupBox("Classifier Configuration")
+        form_layout = QFormLayout()
+        
+        self.classifier_combo = QComboBox()
+        self.classifier_combo.addItems(["Naive Bayes"])
+        
+        self.test_mode_combo = QComboBox()
+        self.test_mode_combo.addItems(["Training set", "Cross-validation", "Percentage split"])
+        
+        form_layout.addRow("Classifier:", self.classifier_combo)
+        form_layout.addRow("Test mode:", self.test_mode_combo)
+        classifier_group.setLayout(form_layout)
 
-    def onOpen(self):
-        ftypes = [('ARF data files', '*.arff'), ('CSV data files', '*.csv'), ('All files', '*')]
-        dlg = filedialog.Open(self, filetypes = ftypes)
-        fl = dlg.show()
+        results_group = QGroupBox("Results")
+        results_lyt = QVBoxLayout()
+        self.results_text = QTextEdit()
+        self.results_text.setReadOnly(True)
+        results_lyt.addWidget(self.results_text)
+        results_group.setLayout(results_lyt)
 
-        if fl:
-            text = self.readFile(fl)
-            print(text)
+        control_lyt = QHBoxLayout()
+        start_btn = QPushButton("Start")
+        stop_btn = QPushButton("Stop")
+        clear_btn = QPushButton("Clear")
+        control_lyt.addStretch()
+        control_lyt.addWidget(start_btn)
+        control_lyt.addWidget(stop_btn)
+        control_lyt.addWidget(clear_btn)
 
-    def readFile(self, filename):
-        f = open(filename, "r")
-        text = f.read()
-        return text
+        status_bar = QLabel("Ready")
+        
+        button_lyt = QHBoxLayout()
+        open_file_btn = QPushButton("Open file...")
+        open_db_btn = QPushButton("Open DB..")
+        generate_btn = QPushButton("Generate..")
+        button_lyt.addWidget(open_file_btn)
+        button_lyt.addWidget(open_db_btn)
+        button_lyt.addWidget(generate_btn)
+    
+        main_lyt.addLayout(button_lyt)
+        main_lyt.addWidget(classifier_group)
+        main_lyt.addWidget(results_group)
+        main_lyt.addLayout(control_lyt)
+        main_lyt.addWidget(status_bar)
 
-    def top_bar(self):
-        self.open_file_button = ttk.Button(self.preprocess_tab, text="Open file...", command=self.onOpen)
-        self.open_file_button.grid(row=0, column=0, sticky="nswe", padx=3, pady=5)
+        self.setLayout(main_lyt)
 
-        self.open_db_button = ttk.Button(self.preprocess_tab, text="Open DB...", command=lambda:print("open db pressed"))
-        self.open_db_button.grid(row=0, column=1, sticky="nswe", padx=3, pady=5)
+        start_btn.clicked.connect(self.on_start)
+        stop_btn.clicked.connect(self.on_stop)
+        open_file_btn.clicked.connect(self.open_file_dlg)
+        clear_btn.clicked.connect(self.on_clear)
 
-    def tab_bar(self):
-        tab_bar_obj = ttk.Notebook(self)
+    def on_start(self):
+        self.results_text.append("Start button pressed\n")
 
-        # Create tabs
-        self.preprocess_tab = ttk.Frame(tab_bar_obj)
-        self.classify_tab = ttk.Frame(tab_bar_obj)
+    def on_stop(self):
+        self.results_text.append("Stop button pressed\n")
 
-        # Add tabs to the notebook
-        tab_bar_obj.add(self.preprocess_tab, text='Preprocess')
-        tab_bar_obj.add(self.classify_tab, text='Classify')
-
-        # Add the notebook to the grid and make it expand
-        tab_bar_obj.grid(row=0, column=0, sticky="nswe")
-
-        # Configure the grid weights for the notebook
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
-
-        self.preprocess_tab.grid_rowconfigure(0, weight=0)
-        self.preprocess_tab.grid_rowconfigure(1, weight=1)
-        self.preprocess_tab.grid_columnconfigure(0, weight=0)
-        self.preprocess_tab.grid_columnconfigure(1, weight=0)
-        self.preprocess_tab.grid_columnconfigure(2, weight=2)
-
-        self.classify_tab.grid_rowconfigure(0, weight=1)
-        self.classify_tab.grid_columnconfigure(0, weight=1)
+    def open_file_dlg(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Arff files (*.arff);;Csv files (*.csv);;Any file (*.*)")
+        
+        if file_path:
+            try:
+                with open(file_path, 'r') as file:
+                    file_contents = file.read()
+                    self.results_text.append(f"Opened file {file_path}:\n{file_contents}\n")
+            except Exception as e:
+                self.results_text.append(f"Error reading file: {e}\n")
+    
+    def on_clear(self):
+        self.results_text.clear()
 
 
 if __name__ == "__main__":
-    app = Application()
-    sv_ttk.set_theme("dark")
-    app.mainloop()
+    app = QApplication(sys.argv)
+    window = App()
+    window.show()
+    sys.exit(app.exec())
