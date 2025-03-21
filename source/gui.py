@@ -1,3 +1,4 @@
+import csv
 import sys
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
@@ -13,6 +14,8 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QFileDialog
 )
+
+from utils import csv_read, arff_read
 
 class App(QWidget):
     def __init__(self):
@@ -86,15 +89,23 @@ class App(QWidget):
         self.results_text.append("Stop button pressed\n")
 
     def open_file_dlg(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Arff files (*.arff);;Csv files (*.csv);;Any file (*.*)")
-        
+        file_path, sfilter = QFileDialog.getOpenFileName(self, "Open File", "", "Arff files (*.arff);;CSV files (*.csv);;Any file (*.*)")
         if file_path:
             try:
-                with open(file_path, 'r') as file:
-                    file_contents = file.read()
-                    self.results_text.append(f"Opened file {file_path}:\n{file_contents}\n")
+                if(sfilter == "Arff files (*.arff)"):
+                    with open(file_path, 'r', encoding='utf-8') as file:
+                        txt = file.read()
+                        self.results_text.append(arff_read.relation_val(txt))
+                        self.results_text.append(str(arff_read.attribute_val(txt)))
+                elif(sfilter == "CSV files (*.csv)"):
+                    df = csv_read.read_csv(file_path)
+                    self.results_text.append(str(df))
+                else:
+                    with open(file_path, 'r') as file:
+                        txt = file.read()
+                        self.results_text.append(f"Opened file {file_path}:\n{txt}\n")
             except Exception as e:
-                self.results_text.append(f"Error reading file: {e}\n")
+               print(f"Error reading file: {e}\n")
     
     def on_clear(self):
         self.results_text.clear()
