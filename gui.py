@@ -1,8 +1,5 @@
-import csv
-import sys
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
-    QApplication,
     QWidget,
     QVBoxLayout,
     QHBoxLayout,
@@ -15,13 +12,13 @@ from PySide6.QtWidgets import (
     QFileDialog
 )
 
-from utils import csv_read, arff_read
+from utils import file_read
 
 class App(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Title ?")
-        self.setGeometry(0, 0, 800, 600)
+        self.setGeometry(500, 500, 800, 600)
 
         app_icon = QIcon("assets/dit_grey_500.png") # not working?
         self.setWindowIcon(app_icon)
@@ -95,10 +92,10 @@ class App(QWidget):
                 if(sfilter == "Arff files (*.arff)"):
                     with open(file_path, 'r', encoding='utf-8') as file:
                         txt = file.read()
-                        self.results_text.append(arff_read.relation_val(txt))
-                        self.results_text.append(str(arff_read.attribute_val(txt)))
+                        self.results_text.append(file_read.relation_val(txt))
+                        self.results_text.append(str(file_read.attribute_val(txt)))
                 elif(sfilter == "CSV files (*.csv)"):
-                    df = csv_read.read_csv(file_path)
+                    df = file_read.read_csv(file_path)
                     self.results_text.append(str(df))
                 else:
                     with open(file_path, 'r') as file:
@@ -111,9 +108,3 @@ class App(QWidget):
         self.results_text.clear()
 
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setStyle("Fusion")
-    window = App()
-    window.show()
-    sys.exit(app.exec())
