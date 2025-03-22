@@ -23,7 +23,7 @@ class App(QWidget):
         self.setWindowTitle("Title ?")
         self.setGeometry(0, 0, 800, 600)
 
-        app_icon = QIcon("assets/logo_flat_h50.png") # not working?
+        app_icon = QIcon("assets/dit_grey_500.png") # not working?
         self.setWindowIcon(app_icon)
 
         self.initUI()

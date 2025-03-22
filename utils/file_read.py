@@ -17,6 +17,9 @@ def read_arff(text):
     print(f"Relation: {relation_val(text)}")
     print(f"Attributes: {attribute_val(text)}")
 
+def read_csv(f_location):
+    return pd.read_csv(f_location)
+
 if __name__ == "__main__":
     x = "@relation contact-lenses\n\
         @attribute age 			{young, pre-presbyopic, presbyopic}\n\
