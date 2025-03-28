@@ -1,1 +1,1 @@
-from .data import load_csv, load_arff
+from .data import data

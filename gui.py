@@ -13,10 +13,15 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QFileDialog,
     QTabWidget,
+    QListWidget,
+    QAbstractItemView,
+    QListWidgetItem,
+    QStyleFactory
 )
+from PySide6.QtCore import Qt
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.model_selection import train_test_split
-from utils.data import load_arff, load_csv
+from utils.data import data
 from gaussian_NB import GaussianNaiveBayes
 
 class App(QWidget):
@@ -56,15 +61,24 @@ class App(QWidget):
         button_lyt.addWidget(open_file_btn)
         button_lyt.addWidget(open_db_btn)
         button_lyt.addWidget(generate_btn)
-        layout.addLayout(button_lyt)
+        
         open_file_btn.clicked.connect(self.open_file_dlg)
+
+        attr_group = QGroupBox("Attributes")
+        form_layout = QVBoxLayout()
+        self.listwidget = QListWidget()
+        self.listwidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        form_layout.addWidget(self.listwidget)  # Add the QListWidget to the QVBoxLayout
+        attr_group.setLayout(form_layout)  # Set the QVBoxLayout as the layout for the QGroupBox
+
+        layout.addLayout(button_lyt)
+        layout.addWidget(attr_group)  # Add the QGroupBox to the main layout
 
     def classify_tab(self):
         layout = QVBoxLayout(self.tab2)
 
         classifier_group = QGroupBox("Classifier Configuration")
         form_layout = QFormLayout()
-        self.test_mode_combo = QComboBox()
         self.classifier_combo = QComboBox()
         self.classifier_combo.addItems(["Gaussian Naive Bayes"])
         form_layout.addRow("Classifier:", self.classifier_combo)
@@ -122,9 +136,21 @@ class App(QWidget):
         if file_path:
             try:
                 if(sfilter == "Arff files (*.arff)"):
-                    self.features, self.labels = load_arff(file_path)
+                    pass
                 elif(sfilter == "CSV files (*.csv)"):
-                    self.features, self.labels = load_csv(file_path)
+                    data_obj = data()
+                    data_obj.load_csv(file_path)
+                    self.features = data_obj.features
+                    self.labels = data_obj.labels
+                    self.attributes = data_obj.attributes
+                    # Add numbering and checkboxes
+                    for _, attribute in enumerate(self.attributes, start=1):
+                        item = QListWidgetItem()
+                        item.setText(f"{attribute}")
+                        item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                        item.setCheckState(Qt.Unchecked)
+                        self.listwidget.addItem(item)
+                    #self.listwidget.addItems(self.attributes)
                 else:
                     with open(file_path, 'r') as file:
                         txt = file.read()
@@ -138,6 +164,7 @@ class App(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+#    print(QStyleFactory.keys())
     app.setStyle("Fusion")
     window = gui.App()
     window.show()

@@ -1,7 +1,8 @@
 # https://github.com/oniani/ai/blob/main/model/ml/gaussian_naive_bayes.py
 
 import numpy as np
-from utils.data import load_arff, load_csv
+
+from utils.data import data
 
 class GaussianNaiveBayes:
     def fit(self, features: np.ndarray, labels: np.ndarray):
@@ -56,10 +57,10 @@ if __name__ == "__main__":
     from sklearn.metrics import accuracy_score, precision_recall_fscore_support
     from sklearn.model_selection import train_test_split
 
-    features, labels = load_csv("datasets/iris.csv")
-
+    data_obj = data()
+    data_obj.load_csv("datasets/iris.csv")
     train_features, test_features, train_labels, test_labels = train_test_split(
-        features, labels, test_size=0.5, random_state=0
+        data_obj.features, data_obj.labels, test_size=0.5, random_state=0
     )
 
     gnb = GaussianNaiveBayes()
