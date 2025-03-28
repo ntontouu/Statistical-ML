@@ -1,5 +1,4 @@
-import sys
-import gui
+import sys, gui, platform
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication,
@@ -56,8 +55,8 @@ class App(QWidget):
 
         button_lyt = QHBoxLayout()
         open_file_btn = QPushButton("Open file...")
-        open_db_btn = QPushButton("Open DB..")
-        generate_btn = QPushButton("Generate..")
+        open_db_btn = QPushButton("Open DB...")
+        generate_btn = QPushButton("Generate...")
         button_lyt.addWidget(open_file_btn)
         button_lyt.addWidget(open_db_btn)
         button_lyt.addWidget(generate_btn)
@@ -164,8 +163,9 @@ class App(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-#    print(QStyleFactory.keys())
-    app.setStyle("Fusion")
+    pltf = platform.system()
+    if pltf == "Windows":
+        app.setStyle("windowsvista")
     window = gui.App()
     window.show()
     sys.exit(app.exec())
