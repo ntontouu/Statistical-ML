@@ -15,7 +15,9 @@ from PySide6.QtWidgets import (
     QListWidget,
     QAbstractItemView,
     QListWidgetItem,
-    QStyleFactory
+    QStyleFactory,
+    QLabel,
+    QGridLayout
 )
 from PySide6.QtCore import Qt
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
@@ -42,6 +44,7 @@ class App(QWidget):
         self.tab2 = QWidget()
         self.tab_widget.addTab(self.tab1, "Preprocess")
         self.tab_widget.addTab(self.tab2, "Classify")
+        self.tab_widget.setTabEnabled(1, False)
 
         main_lyt.addWidget(self.tab_widget)
 
@@ -57,21 +60,48 @@ class App(QWidget):
         open_file_btn = QPushButton("Open file...")
         open_db_btn = QPushButton("Open DB...")
         generate_btn = QPushButton("Generate...")
+        edit_btn = QPushButton("Edit...")
+        save_btn = QPushButton("Save...")
         button_lyt.addWidget(open_file_btn)
         button_lyt.addWidget(open_db_btn)
         button_lyt.addWidget(generate_btn)
-        
+        button_lyt.addWidget(edit_btn)
+        button_lyt.addWidget(save_btn)
         open_file_btn.clicked.connect(self.open_file_dlg)
+
+        cur_rel_group = QGroupBox("Current Relation")
+        rel_layout = QGridLayout()
+        self.rel_label = QLabel(f"Relation: {None}")
+        self.inst_label = QLabel(f"Instances: {None}")
+        self.attr_label = QLabel(f"Attributes: {None}")
+        self.sow_label = QLabel(f"Sum of weights: {None}")
+
+        rel_layout.addWidget(self.rel_label, 0, 0)
+        rel_layout.addWidget(self.inst_label, 1, 0)
+        rel_layout.addWidget(self.attr_label, 0, 1)
+        rel_layout.addWidget(self.sow_label, 1, 1)
+        cur_rel_group.setLayout(rel_layout)
 
         attr_group = QGroupBox("Attributes")
         form_layout = QVBoxLayout()
+        attr_btn_layout = QHBoxLayout()
+        all_btn = QPushButton("All")
+        none_btn = QPushButton("None")
+        invert_btn = QPushButton("Invert")
+        attr_btn_layout.addWidget(all_btn)
+        attr_btn_layout.addWidget(none_btn)
+        attr_btn_layout.addWidget(invert_btn)
         self.listwidget = QListWidget()
         self.listwidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        form_layout.addWidget(self.listwidget)  # Add the QListWidget to the QVBoxLayout
-        attr_group.setLayout(form_layout)  # Set the QVBoxLayout as the layout for the QGroupBox
+        remove_btn = QPushButton("Remove")
+        form_layout.addLayout(attr_btn_layout)
+        form_layout.addWidget(self.listwidget)
+        form_layout.addWidget(remove_btn)
+        attr_group.setLayout(form_layout)
 
         layout.addLayout(button_lyt)
-        layout.addWidget(attr_group)  # Add the QGroupBox to the main layout
+        layout.addWidget(cur_rel_group)
+        layout.addWidget(attr_group)
 
     def classify_tab(self):
         layout = QVBoxLayout(self.tab2)
@@ -142,14 +172,18 @@ class App(QWidget):
                     self.features = data_obj.features
                     self.labels = data_obj.labels
                     self.attributes = data_obj.attributes
-                    # Add numbering and checkboxes
+                    self.rel_label.setText(f"Relation: {file_path.split('/')[-1].split('.')[0]}")
+                    self.inst_label.setText(f"Instances: {len(data_obj.features)}")
+                    self.attr_label.setText(f"Attributes: {len(data_obj.attributes)}")
                     for _, attribute in enumerate(self.attributes, start=1):
                         item = QListWidgetItem()
                         item.setText(f"{attribute}")
                         item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
                         item.setCheckState(Qt.Unchecked)
                         self.listwidget.addItem(item)
-                    #self.listwidget.addItems(self.attributes)
+
+                    self.tab_widget.setTabEnabled(1, True)
+                    
                 else:
                     with open(file_path, 'r') as file:
                         txt = file.read()
