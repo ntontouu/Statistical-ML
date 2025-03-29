@@ -16,8 +16,10 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QListWidgetItem,
     QStyleFactory,
+    QLineEdit,
     QLabel,
-    QGridLayout
+    QGridLayout,
+    QRadioButton
 )
 from PySide6.QtCore import Qt
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
@@ -44,7 +46,7 @@ class App(QWidget):
         self.tab2 = QWidget()
         self.tab_widget.addTab(self.tab1, "Preprocess")
         self.tab_widget.addTab(self.tab2, "Classify")
-        self.tab_widget.setTabEnabled(1, False)
+#        self.tab_widget.setTabEnabled(1, False)
 
         main_lyt.addWidget(self.tab_widget)
 
@@ -75,7 +77,6 @@ class App(QWidget):
         self.inst_label = QLabel(f"Instances: {None}")
         self.attr_label = QLabel(f"Attributes: {None}")
         self.sow_label = QLabel(f"Sum of weights: {None}")
-
         rel_layout.addWidget(self.rel_label, 0, 0)
         rel_layout.addWidget(self.inst_label, 1, 0)
         rel_layout.addWidget(self.attr_label, 0, 1)
@@ -99,9 +100,35 @@ class App(QWidget):
         form_layout.addWidget(remove_btn)
         attr_group.setLayout(form_layout)
 
+        selat_group = QGroupBox("Selected attribute")
+        selat_lyt = QVBoxLayout()
+
+        lbl_layout = QHBoxLayout()
+        self.selat_name_label = QLabel(f"Name: {None}")
+        self.selat_type_label = QLabel(f"Type: {None}")
+        lbl_layout.addWidget(self.selat_name_label)
+        lbl_layout.addWidget(self.selat_type_label)
+        selat_lyt.addLayout(lbl_layout)
+
+        self.selat_list = QListWidget()
+        self.selat_list.setSelectionMode(QAbstractItemView.SingleSelection)
+        selat_lyt.addWidget(self.selat_list)
+        
+        selat_group.setLayout(selat_lyt)
+
+        left_lyt = QVBoxLayout()
+        left_lyt.addWidget(cur_rel_group)
+        left_lyt.addWidget(attr_group)
+        
+        right_lyt = QVBoxLayout()
+        right_lyt.addWidget(selat_group)
+
+        merged_lyt = QHBoxLayout()
+        merged_lyt.addLayout(left_lyt)
+        merged_lyt.addLayout(right_lyt)
+
         layout.addLayout(button_lyt)
-        layout.addWidget(cur_rel_group)
-        layout.addWidget(attr_group)
+        layout.addLayout(merged_lyt)
 
     def classify_tab(self):
         layout = QVBoxLayout(self.tab2)
@@ -113,6 +140,32 @@ class App(QWidget):
         form_layout.addRow("Classifier:", self.classifier_combo)
         classifier_group.setLayout(form_layout)
         layout.addWidget(classifier_group)
+
+        testopt_group = QGroupBox("Test options")
+        testopt_lyt = QVBoxLayout()
+        self.training_set_radio = QRadioButton("Use training set")
+        self.supplied_test_radio = QRadioButton("Supplied test set")
+        self.percentage_split_radio = QRadioButton("Percentage split")
+        self.percentage_split_radio.setChecked(True)
+        self.set_button = QPushButton("Set...")
+        self.set_button.setEnabled(False)
+
+        testopt_lyt.addWidget(self.training_set_radio)
+        slyt = QHBoxLayout()
+        slyt.addWidget(self.supplied_test_radio)
+        slyt.addWidget(self.set_button)
+        
+        plyt = QHBoxLayout()
+        plyt.addWidget(self.percentage_split_radio)
+        self.percentage_split_text = QLineEdit()
+        self.percentage_split_text.setFixedHeight(28)
+        self.percentage_split_text.setFixedWidth(28)
+        self.percentage_split_text.setPlaceholderText("%")
+        plyt.addWidget(self.percentage_split_text)
+        
+        testopt_lyt.addLayout(slyt)
+        testopt_lyt.addLayout(plyt)
+        testopt_group.setLayout(testopt_lyt)
 
         results_group = QGroupBox("Results")
         results_lyt = QVBoxLayout()
@@ -130,6 +183,7 @@ class App(QWidget):
         control_lyt.addWidget(stop_btn)
         control_lyt.addWidget(clear_btn)
 
+        layout.addWidget(testopt_group)
         layout.addWidget(results_group)
         layout.addLayout(control_lyt)
 
