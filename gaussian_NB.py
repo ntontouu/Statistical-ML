@@ -10,9 +10,8 @@ class GaussianNaiveBayes:
 
         self.labels = labels
         self.unique_labels = np.unique(labels)
-
         self.params = []
-        # For the given label, calculate the mean and variance of all features
+        # Calculate the mean and variance of all features
         for label in self.unique_labels:
             label_features = features[self.labels == label]
             self.params.append([(col.mean(), col.var()) for col in label_features.T])
@@ -40,7 +39,6 @@ class GaussianNaiveBayes:
                 # Prior is the mean of what we have
                 prior = np.log((self.labels == label).mean())
 
-                # Independence:
                 #   P(a0, a1, a2 | B) = P(a0 | B) * P(a1 | B) * P(a2 | B)
                 pairs = zip(feature, self.params[label_idx])
                 likelihood = np.sum([np.log(self.likelihood(f, m, v)) for f, (m, v) in pairs])
@@ -60,7 +58,7 @@ if __name__ == "__main__":
     data_obj = data()
     data_obj.load_csv("datasets/iris.csv")
     train_features, test_features, train_labels, test_labels = train_test_split(
-        data_obj.features, data_obj.labels, test_size=0.5, random_state=0
+        data_obj.features, data_obj.labels, test_size=0.25, random_state=0
     )
 
     gnb = GaussianNaiveBayes()

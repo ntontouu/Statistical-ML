@@ -4,6 +4,17 @@ import csv
 
 import numpy as np
 
+def arff_data(text):
+    data_match = re.search(r'(?ims)^\s*@data\s*$(.*?)(?=^\s*@|\Z)', text, re.MULTILINE | re.IGNORECASE)
+    if data_match:
+        data = data_match.group(1).strip()
+        data_lines = [line.strip() for line in data.split('\n') if line.strip() and not line.strip().startswith('%')]
+        lines = csv.reader(data_lines)
+        dataset = list(lines)
+        return dataset
+
+    return None
+
 @dataclass
 class data:
     def load_arff(self, f_location:str):
@@ -51,17 +62,6 @@ class data:
 
         self.features = np.array(features)
         self.labels = enumerated_labels
-
-def arff_data(text):
-    data_match = re.search(r'(?ims)^\s*@data\s*$(.*?)(?=^\s*@|\Z)', text, re.MULTILINE | re.IGNORECASE)
-    if data_match:
-        data = data_match.group(1).strip()
-        data_lines = [line.strip() for line in data.split('\n') if line.strip() and not line.strip().startswith('%')]
-        lines = csv.reader(data_lines)
-        dataset = list(lines)
-        return dataset
-
-    return None
 
 
 
