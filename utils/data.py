@@ -29,9 +29,7 @@ class data:
         labels = []
 
         for row in data:
-            features.append(
-                [float(value) for value in row[:-1]]
-            )
+            features.append([float(value) for value in row[:-1]])
             labels.append(row[-1])
 
         unique_labels = {label: idx for idx, label in enumerate(sorted(set(labels)))}
@@ -62,7 +60,3 @@ class data:
 
         self.features = np.array(features)
         self.labels = enumerated_labels
-
-
-
-
