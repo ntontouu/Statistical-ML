@@ -27,9 +27,18 @@ class data:
 
         features = []
         labels = []
-
+        descrete_idx = []
         for row in data:
-            features.append([float(value) for value in row[:-1]])
+            p_row = []
+            for idx, value in enumerate(row[:-1]):
+                try:
+                    p_row.append(float(value))
+                except:
+                    p_row.append(value)
+                    if idx not in descrete_idx:
+                        descrete_idx.append(idx)
+            
+            features.append(p_row)
             labels.append(row[-1])
 
         unique_labels = {label: idx for idx, label in enumerate(sorted(set(labels)))}
@@ -50,13 +59,21 @@ class data:
 
         features = []
         labels = []
+        descrete_idx = []
 
         for row in data:
-            features.append([float(value) for value in row[:-1]])
-            labels.append(row[-1])
+            try:
+                features.append([float(value) for value in row[:-1]])
+                labels.append(row[-1])
+            except:
+                descrete_idx.append(row)
 
         unique_labels = {label: idx for idx, label in enumerate(sorted(set(labels)))}
         enumerated_labels = [unique_labels[label] for label in labels]
 
         self.features = np.array(features)
         self.labels = enumerated_labels
+
+if __name__ == "__main__":
+    data_obj = data()
+    data_obj.load_arff("datasets/contact-lenses.arff")
